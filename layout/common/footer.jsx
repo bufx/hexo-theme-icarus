@@ -11,6 +11,7 @@ class Footer extends Component {
             siteYear,
             author,
             links,
+            beians,
             showVisitorCounter,
             visitorCounterTitle
         } = this.props;
@@ -37,6 +38,16 @@ class Footer extends Component {
                             <span dangerouslySetInnerHTML={{ __html: `&copy; ${siteYear} ${author || siteTitle}` }}></span>
                             &nbsp;&nbsp;Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>&nbsp;&&nbsp;
                             <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a>
+
+                            {Object.keys(beians).map(name => {
+                                const beian = beians[name];
+                                return beian.content ?
+                                        <span>
+                                            &nbsp;&nbsp;<img src={beian.logo}/>
+                                            &nbsp;&nbsp;<a title={beian.content} href={beian.url} target="_blank" rel="noopener">{beian.content}</a>
+                                        </span>
+                                        : "";
+                            })}
                             {showVisitorCounter ? <br /> : null}
                             {showVisitorCounter ? <span id="busuanzi_container_site_uv"
                                 dangerouslySetInnerHTML={{ __html: visitorCounterTitle }}></span> : null}
@@ -66,12 +77,23 @@ module.exports = cacheComponent(Footer, 'common.footer', props => {
     const { logo, title, author, footer, plugins } = config;
 
     const links = {};
+    const beians = {};
     if (footer && footer.links) {
         Object.keys(footer.links).forEach(name => {
             const link = footer.links[name];
             links[name] = {
                 url: url_for(typeof link === 'string' ? link : link.url),
                 icon: link.icon
+            };
+        });
+    }
+    if (footer && footer.beians) {
+        Object.keys(footer.beians).forEach(name => {
+            const beian = footer.beians[name];
+            beians[name] = {
+                url: url_for(typeof beian === 'string' ? beian : beian.url),
+                content: beian.content,
+                logo: beian.logo
             };
         });
     }
@@ -84,6 +106,7 @@ module.exports = cacheComponent(Footer, 'common.footer', props => {
         siteYear: date(new Date(), 'YYYY'),
         author,
         links,
+        beians,
         showVisitorCounter: plugins && plugins.busuanzi === true,
         visitorCounterTitle: _p('plugin.visitor_count', '<span id="busuanzi_value_site_uv">0</span>')
     };
